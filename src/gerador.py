@@ -6,19 +6,34 @@ from spade.message import Message
 import random
 
 class Gerador(Agent):
-    x = random.randint(-1000,1000)
+    grau = random.randint(1,3) #escolhe grau aleatório para a função
     a=0
     while a == 0:
         a = random.randint(-100,100)
-    y = -1 * (a*x)
-
-    class funcao_1grau(CyclicBehaviour):
+    if grau==1:
+        x1 = random.randint(-1000,1000)
+        y = -1 * (a*x1)
+    elif grau==2:
+        x1 = random.randint(-1000,1000)
+        x2 = random.randint(-1000,1000)
+    else:
+        x1 = random.randint(-1000,1000)
+        x2 = random.randint(-1000,1000)
+        x3 = random.randint(-1000,1000)
+        
+        
+    class funcao(CyclicBehaviour):
         async def run(self):
             res = await self.receive(timeout=5)
             if res:
                 x = float(res.body)
-                x = float( Gerador.a*x + Gerador.y )
-                # print("Enviou para " + str(res.sender) + " f(",res.body,")= ",x,"=>",int(x))
+                if Gerador.grau == 1:
+                    x = float(Gerador.a*x + Gerador.y)
+                elif Gerador.grau == 2:
+                    x = float(Gerador.a*(x-Gerador.x1)*(x-Gerador.x2))
+                else:
+                    x = float(Gerador.a*(x-Gerador.x1)*(x-Gerador.x2)*(x-Gerador.x3))
+                
                 msg = Message(to=str(res.sender)) 
                 msg.set_metadata("performative", "inform")  
                 msg.body = str(int(x))
@@ -30,7 +45,12 @@ class Gerador(Agent):
             if msg:
                 msg = Message(to=str(msg.sender))
                 msg.set_metadata("performative", "inform")
-                msg.body = "1grau" 
+                if Gerador.grau==1:
+                    msg.body = "1grau" 
+                elif Gerador.grau==2:
+                    msg.body = "2grau"
+                else:
+                    msg.body = "3grau"
                 await self.send(msg)
                 print("Respondeu para" + str(msg.sender) + " com " + msg.body)
             else:
@@ -39,7 +59,7 @@ class Gerador(Agent):
     async def setup(self):
         t = Template()
         t.set_metadata("performative","inform")
-        tf = self.funcao_1grau()
+        tf = self.funcao()
         
         self.add_behaviour(tf,t)
 
@@ -48,5 +68,12 @@ class Gerador(Agent):
         template.set_metadata("performative", "request")
         self.add_behaviour(ft, template)
 
-        print("Funcao de 1o grau: ", Gerador.x)
-        print("Funcao: ", Gerador.a, "x + (", Gerador.y, ")")
+        if Gerador.grau==1:
+            print("Funcao de 1o grau: ")
+            print(Gerador.a, "x + (", Gerador.y, ")")
+        elif Gerador.grau==2:
+            print("Funcao de 2o grau: ")
+            print(f'{Gerador.a}*(x-({Gerador.x1}))*(x-({Gerador.x2}))*')
+        else:
+            print("Funcao de 3o grau: ")
+            print(f'{Gerador.a}*(x-({Gerador.x1}))*(x-({Gerador.x2}))*(x-({Gerador.x3}))')
