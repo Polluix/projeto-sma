@@ -2,20 +2,23 @@ import asyncio
 import spade
 from spade import wait_until_finished
 from spade.agent import Agent
-from spade.behaviour import CyclicBehaviour
+from spade.behaviour import CyclicBehaviour, OneShotBehaviour
+from spade.message import Message
+import random
 
 class Resolvedor(Agent):
-    class MyBehav(CyclicBehaviour):
-        async def on_start(self):
-            print("Starting behaviour . . .")
-            self.counter = 0
 
+    class send_x(OneShotBehaviour):
         async def run(self):
-            print("Counter: {}".format(self.counter))
-            self.counter += 1
-            await asyncio.sleep(1)
+            x = random.randint(-1000,1000)
+            message = Message(to="geradorlufel@jix.im")
+            message.set_metadata("performative", "inform")
+            message.body=str(x)
+
+            await self.send(message)
+            await self.agent.stop()
+            
 
     async def setup(self):
-        print("Hello World! I'm agent {}".format(str(self.jid)))
-        b = self.MyBehav()
+        b = self.send_x()
         self.add_behaviour(b)
