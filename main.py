@@ -12,7 +12,5 @@ async def main():
     await resolvedor.start()
     print('resolvedor iniciado')
 
-
-
 if __name__=='__main__':
     spade.run(main())

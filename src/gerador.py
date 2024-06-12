@@ -18,7 +18,7 @@ class Gerador(Agent):
             if res:
                 x = float(res.body)
                 x = float( Gerador.a*x + Gerador.y )
-                print("Enviou para " + str(res.sender) + " f(",res.body,")= ",x,"=>",int(x))
+                # print("Enviou para " + str(res.sender) + " f(",res.body,")= ",x,"=>",int(x))
                 msg = Message(to=str(res.sender)) 
                 msg.set_metadata("performative", "inform")  
                 msg.body = str(int(x))
@@ -33,8 +33,9 @@ class Gerador(Agent):
                 msg.body = "1grau" 
                 await self.send(msg)
                 print("Respondeu para" + str(msg.sender) + " com " + msg.body)
-
-
+            else:
+                self.kill()
+                
     async def setup(self):
         t = Template()
         t.set_metadata("performative","inform")
@@ -42,7 +43,10 @@ class Gerador(Agent):
         
         self.add_behaviour(tf,t)
 
-        # ft = self.tipo_funcao()
-        # template = Template()
-        # template.set_metadata("performative", "request")
-        # self.add_behaviour(ft, template)
+        ft = self.tipo_funcao()
+        template = Template()
+        template.set_metadata("performative", "request")
+        self.add_behaviour(ft, template)
+
+        print("Funcao de 1o grau: ", Gerador.x)
+        print("Funcao: ", Gerador.a, "x + (", Gerador.y, ")")
