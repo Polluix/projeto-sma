@@ -26,17 +26,18 @@ class Gerador(Agent):
         async def run(self):
             res = await self.receive(timeout=5)
             if res:
-                x = float(res.body)
+                x = eval(res.body)
+                valores = []
                 if Gerador.grau == 1:
-                    x = float(Gerador.a*x + Gerador.y)
+                    valores = [float(Gerador.a*x + Gerador.y) for x in [0,1,2,3,4]]
                 elif Gerador.grau == 2:
-                    x = float(Gerador.a*(x-Gerador.x1)*(x-Gerador.x2))
+                    valores = [float(Gerador.a*(x-Gerador.x1)*(x-Gerador.x2)) for x in [0,1,2,3,4]]
                 else:
-                    x = float(Gerador.a*(x-Gerador.x1)*(x-Gerador.x2)*(x-Gerador.x3))
+                    valores = [float(Gerador.a*(x-Gerador.x1)*(x-Gerador.x2)*(x-Gerador.x3)) for x in [0,1,2,3,4]]
                 
                 msg = Message(to=str(res.sender)) 
-                msg.set_metadata("performative", "inform")  
-                msg.body = str(int(x))
+                msg.set_metadata("performative", "request")  
+                msg.body = str(valores)
                 await self.send(msg)
 
     class tipo_funcao(CyclicBehaviour):
@@ -52,7 +53,7 @@ class Gerador(Agent):
                 else:
                     msg.body = "3grau"
                 await self.send(msg)
-                print("Respondeu para" + str(msg.sender) + " com " + msg.body)
+                # print("Respondeu para" + str(msg.sender) + " com " + msg.body)
             else:
                 self.kill()
                 
@@ -73,7 +74,7 @@ class Gerador(Agent):
             print(Gerador.a, "x + (", Gerador.y, ")")
         elif Gerador.grau==2:
             print("Funcao de 2o grau: ")
-            print(f'{Gerador.a}*(x-({Gerador.x1}))*(x-({Gerador.x2}))*')
+            print(f'{Gerador.a}*(x-({Gerador.x1}))*(x-({Gerador.x2}))')
         else:
             print("Funcao de 3o grau: ")
             print(f'{Gerador.a}*(x-({Gerador.x1}))*(x-({Gerador.x2}))*(x-({Gerador.x3}))')
