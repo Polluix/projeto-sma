@@ -1,11 +1,8 @@
-import asyncio
 import spade
-from spade import wait_until_finished
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 from spade.message import Message
 from spade.template import Template
-import random
 import time
 import numpy as np
 
