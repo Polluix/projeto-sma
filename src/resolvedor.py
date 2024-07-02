@@ -39,17 +39,15 @@ class Resolvedor(Agent):
 
     class solve_grau1(CyclicBehaviour):
         async def run(self):
-            if Resolvedor.valores_y != []:
-                x1 = Resolvedor.valores_x[0]
-                x2 = Resolvedor.valores_x[1]
-                y1 = Resolvedor.valores_y[0]
-                y2 = Resolvedor.valores_y[1]
+            x1 = Resolvedor.valores_x[0]
+            x2 = Resolvedor.valores_x[1]
+            y1 = Resolvedor.valores_y[0]
+            y2 = Resolvedor.valores_y[1]
 
-                a = (y2-y1)/(x2-x1)
-                b = y1
-                
-                print(f'Raíz da função do 1o grau: {-b/a}\n')
-                self.kill()
+            a = (y2-y1)/(x2-x1)
+            b = y1
+            print(f'Raíz da função do 1o grau: {-b/a}\n')
+            self.kill()
 
     class solve_grau2(CyclicBehaviour):
         async def run(self):
@@ -89,7 +87,7 @@ class Resolvedor(Agent):
                 
     class solve_equation(CyclicBehaviour):
         async def run(self):
-            if Resolvedor.valores_y != []:
+            if Resolvedor.grau!=0:
                 solvers = {
                     '1':Resolvedor.solve_grau1(),
                     '2':Resolvedor.solve_grau2(),

@@ -1,7 +1,6 @@
 import spade
 from src.resolvedor import Resolvedor
 from src.gerador import Gerador
-from src.informante import Informante
 from spade import wait_until_finished
 
 async def main():
