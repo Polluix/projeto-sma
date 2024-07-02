@@ -1,3 +1,4 @@
+import time
 import spade
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
@@ -35,8 +36,8 @@ class Gerador(Agent):
                 else:
                     valores = [float(Gerador.a*(x-Gerador.x1)*(x-Gerador.x2)*(x-Gerador.x3)) for x in [0,1,2,3,4]]
                 
-                msg = Message(to=str(res.sender)) 
-                msg.set_metadata("performative", "request")  
+                msg = Message(to=str(res.sender))
+                msg.set_metadata('performative', 'request')
                 msg.body = str(valores)
                 await self.send(msg)
 
@@ -78,3 +79,21 @@ class Gerador(Agent):
         else:
             print("Funcao de 3o grau: ")
             print(f'{Gerador.a}*(x-({Gerador.x1}))*(x-({Gerador.x2}))*(x-({Gerador.x3}))')
+
+
+async def main():
+
+    gerador = Gerador("geradorlufel@jix.im", "Gerador123!")
+    await gerador.start()
+    print('gerador iniciado')
+
+    while gerador.is_alive():
+        try:
+            time.sleep(1)
+        except KeyboardInterrupt:
+            gerador.stop()
+            break
+    print("Agente encerrou!")
+
+if __name__ == '__main__':
+    spade.run(main())
