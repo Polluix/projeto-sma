@@ -14,6 +14,12 @@ class Gerador(Agent):
     for i in range(grau):
         raizes[i] = random.randint(-1000,1000)
         aux[i] = 1
+
+    function_type ={
+            '1':f'{a}*(x-({raizes[0]}))',
+            '2':f'{a}*(x-({raizes[0]}))*(x-({raizes[1]}))',
+            '3':f'{a}*(x-({raizes[0]}))*(x-({raizes[1]}))*(x-({raizes[2]}))'
+    }
         
     class funcao(CyclicBehaviour):
         #alterar forma de gerar funcao, senao so vai gerar grau 3
@@ -31,7 +37,7 @@ class Gerador(Agent):
 
                 valores = function[str(Gerador.grau)]
                 msg = Message(to=str(res.sender))
-                msg.set_metadata('performative', 'request')
+                msg.set_metadata('performative', 'inform')
                 msg.body = str(valores)
                 await self.send(msg)
 
@@ -56,7 +62,7 @@ class Gerador(Agent):
                 
     async def setup(self):
         t = Template()
-        t.set_metadata("performative","inform")
+        t.set_metadata("performative","subscribe")
         tf = self.funcao()
         
         self.add_behaviour(tf,t)
@@ -66,13 +72,7 @@ class Gerador(Agent):
         template.set_metadata("performative", "request")
         self.add_behaviour(ft, template)
 
-        function_type ={
-                '1':f'{Gerador.a}*(x-({Gerador.raizes[0]}))',
-                '2':f'{Gerador.a}*(x-({Gerador.raizes[0]}))*(x-({Gerador.raizes[1]}))',
-                '3':f'{Gerador.a}*(x-({Gerador.raizes[0]}))*(x-({Gerador.raizes[1]}))*(x-({Gerador.raizes[2]}))'
-        }
-
-        print(function_type[str(Gerador.grau)])
+        print(f'Função gerada: {Gerador.function_type[str(Gerador.grau)]}')
 
 async def main():
 

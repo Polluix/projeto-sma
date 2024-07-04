@@ -16,7 +16,7 @@ class Resolvedor(Agent):
     class get_values(CyclicBehaviour):
         async def run(self):
             msg = Message(to="geradorlufel@jix.im")
-            msg.set_metadata("performative", "inform")
+            msg.set_metadata("performative", "subscribe")
             msg.body='[0,1,2,3,4]'
             await self.send(msg)
             valor = await self.receive(timeout=5)
@@ -48,7 +48,7 @@ class Resolvedor(Agent):
 
     class solve_grau2(CyclicBehaviour):
         async def run(self):
-            #montar sistema para resolver numericamente para grau 2 e 3
+            #sistema para resolução numérica
             mat = np.zeros((Resolvedor.grau+1,Resolvedor.grau+1))
 
             mat[:,-1]=1
@@ -65,7 +65,7 @@ class Resolvedor(Agent):
 
     class solve_grau3(CyclicBehaviour):
         async def run(self):
-            #montar sistema para resolver numericamente para grau 2 e 3
+            #sistema para resolução numérica
             mat = np.zeros((Resolvedor.grau+1,Resolvedor.grau+1))
             
             mat[:,-1]=1
@@ -97,17 +97,11 @@ class Resolvedor(Agent):
                 
     
     async def setup(self):
-
-        t2 = Template()
-        t2.set_metadata('performative', 'request')
         valores = self.get_values()
-        self.add_behaviour(valores,t2)
-
-        t1 = Template()
-        t1.set_metadata('performative', 'subscribe')
+        self.add_behaviour(valores)
 
         b1 = self.get_grau()
-        self.add_behaviour(b1,t1)
+        self.add_behaviour(b1)
 
         behaviour = self.solve_equation()
         self.add_behaviour(behaviour)
