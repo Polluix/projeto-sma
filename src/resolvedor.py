@@ -109,7 +109,6 @@ class Resolvedor(Agent):
                     '3':Resolvedor.solve_grau3(),
                 }
                 solver = solvers[str(Resolvedor.grau)]
-                print('vai resolver')
                 self.agent.add_behaviour(solver)
                 
     

@@ -7,13 +7,11 @@ from spade.message import Message
 import random
 
 class Gerador(Agent):
-    grau = random.randint(1,3) #escolhe grau aleatório para a função
+    grau = random.randint(1,1) #escolhe grau aleatório para a função
     a= random.randint(-100,100)
     raizes =[0,0,0]
-    aux = [0,0,0]
     for i in range(grau):
         raizes[i] = random.randint(-1000,1000)
-        aux[i] = 1
 
     function_type ={
             '1':f'{a}*(x-({raizes[0]}))',
@@ -29,9 +27,9 @@ class Gerador(Agent):
                 x = eval(res.body)
                 
                 function ={
-                    '1':float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])),
-                    '2':float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])*(Gerador.aux[1]*x-Gerador.raizes[1])),
-                    '3':float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])*(Gerador.aux[1]*x-Gerador.raizes[1])*(Gerador.aux[2]*x-Gerador.raizes[2]))
+                    '1':float(Gerador.a*(x-Gerador.raizes[0])),
+                    '2':float(Gerador.a*(x-Gerador.raizes[0])*(x-Gerador.raizes[1])),
+                    '3':float(Gerador.a*(x-Gerador.raizes[0])*(x-Gerador.raizes[1])*(x-Gerador.raizes[2]))
                 }
 
                 valor = function[str(Gerador.grau)]
@@ -58,8 +56,6 @@ class Gerador(Agent):
                 msg.body = graus[str(Gerador.grau)]
                 await self.send(msg)
                 # print("Respondeu para" + str(msg.sender) + " com " + msg.body)
-            else:
-                self.kill()
                 
     async def setup(self):
         t = Template()
