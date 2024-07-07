@@ -7,7 +7,7 @@ from spade.message import Message
 import random
 
 class Gerador(Agent):
-    grau = random.randint(1,1) #escolhe grau aleatório para a função
+    grau = random.randint(1,3) #escolhe grau aleatório para a função
     a= random.randint(-100,100)
     raizes =[0,0,0]
     for i in range(grau):
