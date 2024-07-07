@@ -26,20 +26,21 @@ class Gerador(Agent):
         async def run(self):
             res = await self.receive(timeout=5)
             if res:
-                dom = eval(res.body)
-                valores = []
+                x = eval(res.body)
                 
                 function ={
-                    '1':[float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])) for x in dom],
-                    '2':[float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])*(Gerador.aux[1]*x-Gerador.raizes[1])) for x in dom],
-                    '3':[float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])*(Gerador.aux[1]*x-Gerador.raizes[1])*(Gerador.aux[2]*x-Gerador.raizes[2])) for x in dom]
+                    '1':float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])),
+                    '2':float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])*(Gerador.aux[1]*x-Gerador.raizes[1])),
+                    '3':float(Gerador.a*(Gerador.aux[0]*x-Gerador.raizes[0])*(Gerador.aux[1]*x-Gerador.raizes[1])*(Gerador.aux[2]*x-Gerador.raizes[2]))
                 }
 
-                valores = function[str(Gerador.grau)]
+                valor = function[str(Gerador.grau)]
+
                 msg = Message(to=str(res.sender))
                 msg.set_metadata('performative', 'inform')
-                msg.body = str(valores)
+                msg.body = str(valor)
                 await self.send(msg)
+                # print("Respondeu para " + str(msg.sender))
 
     class tipo_funcao(CyclicBehaviour):
         async def run(self):
@@ -49,9 +50,9 @@ class Gerador(Agent):
                 msg.set_metadata("performative", "inform")
                 
                 graus = {
-                    '1':'grau1',
-                    '2':'grau2',
-                    '3':'grau3',
+                    '1':'1grau',
+                    '2':'2grau',
+                    '3':'3grau',
                 }
 
                 msg.body = graus[str(Gerador.grau)]
@@ -62,7 +63,7 @@ class Gerador(Agent):
                 
     async def setup(self):
         t = Template()
-        t.set_metadata("performative","subscribe")
+        t.set_metadata("performative", "subscribe")
         tf = self.funcao()
         
         self.add_behaviour(tf,t)

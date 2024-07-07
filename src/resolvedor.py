@@ -1,6 +1,6 @@
 import spade
 from spade.agent import Agent
-from spade.behaviour import CyclicBehaviour
+from spade.behaviour import CyclicBehaviour,OneShotBehaviour
 from spade.message import Message
 from spade.template import Template
 import time
@@ -10,79 +10,97 @@ GRAU_MAX = 3
 
 class Resolvedor(Agent):
     valores_y = []
-    valores_x = [0,1,2,3,4]
+    valores_x = []
     grau = 0
 
     class get_values(CyclicBehaviour):
         async def run(self):
-            msg = Message(to="geradorlufel@jix.im")
-            msg.set_metadata("performative", "subscribe")
-            msg.body='[0,1,2,3,4]'
+            if len(Resolvedor.valores_y) < Resolvedor.grau+1:
+                msg = Message(to="geradorlufel@jix.im")
+                msg.set_metadata("performative", "subscribe")
+                
+                x = np.random.randint(-1000,1000)
+                msg.body=str(x)
+
+                if x not in Resolvedor.valores_x:
+                    await self.send(msg)
+                    Resolvedor.valores_x.append(x)
+
+                    valor = await self.receive(timeout=5)
+                    
+                    if valor:
+                        Resolvedor.valores_y.append(eval(valor.body))
+                    
+            else:
+                time.sleep(5) #nao resolve a equação se nao houver essa pausa
+                self.agent.add_behaviour(Resolvedor.solve_equation())
+                self.kill()
+
+    class get_grau(OneShotBehaviour):
+        async def run(self):
+            if Resolvedor.grau==0:
+                msg = Message(to="geradorlufel@jix.im")
+                msg.set_metadata('performative', 'request')
+                await self.send(msg)
+                grau_recebido = await self.receive(timeout=5)
+                if grau_recebido:
+                    Resolvedor.grau = int(grau_recebido.body.split('grau')[0])
+                    self.agent.add_behaviour(Resolvedor.get_values())
+                
+    class solve_grau1(OneShotBehaviour):
+        async def run(self):
+            x1 = 0
+
+            msg = Message(to='geradorlufel@jix.im')
+            msg.set_metadata('performative', 'subscribe')
+            msg.body='0'
             await self.send(msg)
-            valor = await self.receive(timeout=5)
-            if valor:
-                Resolvedor.valores_y = eval(valor.body)
 
-    class get_grau(CyclicBehaviour):
-        async def run(self):
-            if len(Resolvedor.valores_y)!=0:
-                diferencas = np.diff(Resolvedor.valores_y)
-                for i in range(GRAU_MAX):
-                    if np.all(diferencas==diferencas[0]):
-                        Resolvedor.grau = i+1 #retorna grau da função
-                        break
-                    else:
-                        diferencas = np.diff(diferencas)
+            img_0 = await self.receive(timeout=5)
+            y1 = eval(img_0.body)
 
-    class solve_grau1(CyclicBehaviour):
-        async def run(self):
-            x1 = Resolvedor.valores_x[0]
             x2 = Resolvedor.valores_x[1]
-            y1 = Resolvedor.valores_y[0]
             y2 = Resolvedor.valores_y[1]
 
             a = (y2-y1)/(x2-x1)
+            
             b = y1
             print(f'Raíz da função do 1o grau: {-b/a}\n')
-            self.kill()
 
-    class solve_grau2(CyclicBehaviour):
+    class solve_grau2(OneShotBehaviour):
         async def run(self):
             #sistema para resolução numérica
             mat = np.zeros((Resolvedor.grau+1,Resolvedor.grau+1))
-
             mat[:,-1]=1
-            mat[:,0] = [Resolvedor.valores_x[1]**2,Resolvedor.valores_x[2]**2,Resolvedor.valores_x[3]**2]
-            mat[:,1] = [Resolvedor.valores_x[1],Resolvedor.valores_x[2],Resolvedor.valores_x[3]]
+            mat[:,0] = [Resolvedor.valores_x[0]**2,Resolvedor.valores_x[1]**2,Resolvedor.valores_x[2]**2]
+            mat[:,1] = [Resolvedor.valores_x[0],Resolvedor.valores_x[1],Resolvedor.valores_x[2]]
 
-            coeficientes = np.linalg.solve(mat,Resolvedor.valores_y[1:4])
+            coeficientes = np.linalg.solve(mat,Resolvedor.valores_y[:])
 
             raizes = np.roots(coeficientes)
             raizes = [round(i) for i in raizes]
 
             print(f'Solução da equação do {Resolvedor.grau}o grau: {raizes}')
-            self.kill()
 
-    class solve_grau3(CyclicBehaviour):
+    class solve_grau3(OneShotBehaviour):
         async def run(self):
             #sistema para resolução numérica
             mat = np.zeros((Resolvedor.grau+1,Resolvedor.grau+1))
             
             mat[:,-1]=1
-            mat[:,0] = [Resolvedor.valores_x[1]**3,Resolvedor.valores_x[2]**3,Resolvedor.valores_x[3]**3,Resolvedor.valores_x[4]**3]
-            mat[:,1] = [Resolvedor.valores_x[1]**2,Resolvedor.valores_x[2]**2,Resolvedor.valores_x[3]**2,Resolvedor.valores_x[4]**2]
-            mat[:,2] = [Resolvedor.valores_x[1],Resolvedor.valores_x[2],Resolvedor.valores_x[3],Resolvedor.valores_x[4]]
+            mat[:,0] = [Resolvedor.valores_x[0]**3,Resolvedor.valores_x[1]**3,Resolvedor.valores_x[2]**3,Resolvedor.valores_x[3]**3]
+            mat[:,1] = [Resolvedor.valores_x[0]**2,Resolvedor.valores_x[1]**2,Resolvedor.valores_x[2]**2,Resolvedor.valores_x[3]**2]
+            mat[:,2] = [Resolvedor.valores_x[0],Resolvedor.valores_x[1],Resolvedor.valores_x[2],Resolvedor.valores_x[3]]
 
-            coeficientes = np.linalg.solve(mat,Resolvedor.valores_y[1:])
+            coeficientes = np.linalg.solve(mat,Resolvedor.valores_y[:])
 
             raizes = np.roots(coeficientes)
             raizes = [round(i) for i in raizes]
 
             print(f'Solução da equação do {Resolvedor.grau}o grau: {raizes}')
-            self.kill()
 
                 
-    class solve_equation(CyclicBehaviour):
+    class solve_equation(OneShotBehaviour):
         async def run(self):
             if Resolvedor.grau!=0:
                 solvers = {
@@ -91,20 +109,17 @@ class Resolvedor(Agent):
                     '3':Resolvedor.solve_grau3(),
                 }
                 solver = solvers[str(Resolvedor.grau)]
-
+                print('vai resolver')
                 self.agent.add_behaviour(solver)
-                self.kill()
                 
     
     async def setup(self):
-        valores = self.get_values()
-        self.add_behaviour(valores)
-
+        # template_grau = Template()
+        # template_grau.set_metadata('performative','inform')
         b1 = self.get_grau()
         self.add_behaviour(b1)
 
-        behaviour = self.solve_equation()
-        self.add_behaviour(behaviour)
+
 
 async def main():
     resolvedor = Resolvedor('resolvedorlufel@jix.im', 'Resolvedor123!')
